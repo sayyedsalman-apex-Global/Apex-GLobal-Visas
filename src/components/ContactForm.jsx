@@ -75,7 +75,7 @@ export default function ContactForm({ preselectedCountry, prefilledMessage }) {
     setSubmitError('');
 
     try {
-      const response = await fetch('/api/send-assessment', {
+      const response = await fetch('/api/send-advisory', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -89,9 +89,25 @@ export default function ContactForm({ preselectedCountry, prefilledMessage }) {
         })
       });
 
-      const resData = await response.json();
       if (!response.ok) {
-        throw new Error(resData.error || 'Failed to dispatch profile assessment email');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to dispatch advisory request.';
+
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          if (errorText) {
+            errorMessage = errorText.slice(0, 200);
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const resData = await response.json();
+      if (!resData.success) {
+        throw new Error(resData.error || 'Failed to dispatch advisory request.');
       }
 
       setIsSubmitting(false);

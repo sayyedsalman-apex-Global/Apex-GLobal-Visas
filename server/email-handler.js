@@ -248,8 +248,10 @@ export async function handleEmailRequest(payload, apiKey) {
 
 
 
-      case 'assessment': {
+      case 'assessment':
+      case 'advisory': {
         const { fullName, email, phone, country, requirements } = data || {};
+        const isAdvisory = action === 'advisory';
         
         // Scan notes for keywords
         const docKeywords = ['passport', 'resume', 'cv', 'ielts', 'transcript', 'degree', 'diploma', 'certificate', 'work', 'experience', 'id'];
@@ -266,10 +268,12 @@ export async function handleEmailRequest(payload, apiKey) {
 
         // Send notification email to admin
         const adminHtml = getHtmlWrapper(
-          'New Lead Profile Assessment',
+          isAdvisory ? 'New Advisory Booking Request' : 'New Lead Profile Assessment',
           `
-          <h2>New Lead Profile Assessment</h2>
-          <p>A user has submitted their details for an initial visa file assessment. Details are summarized below:</p>
+          <h2>${isAdvisory ? 'New Advisory Booking Request' : 'New Lead Profile Assessment'}</h2>
+          <p>${isAdvisory
+            ? 'A user has submitted a consultation request for an advisory session. Details are summarized below:'
+            : 'A user has submitted their details for an initial visa file assessment. Details are summarized below:'}</p>
           
           <div class="card">
             <div class="grid-row">
@@ -308,7 +312,7 @@ export async function handleEmailRequest(payload, apiKey) {
           apiKey,
           from: SENDER,
           to: ADMIN_EMAIL,
-          subject: '[FILE ASSESSMENT] New Lead Request',
+          subject: isAdvisory ? '[BOOK ADVISORY] New Lead Request' : '[FILE ASSESSMENT] New Lead Request',
           html: adminHtml,
           reply_to: email || ADMIN_EMAIL
         });

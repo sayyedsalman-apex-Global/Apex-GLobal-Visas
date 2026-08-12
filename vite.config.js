@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
   const apiKey = env.RESEND_API_KEY;
 
   const apiMiddleware = (req, res, next) => {
-    const validRoutes = ['/api/send-assessment'];
+    const validRoutes = ['/api/send-assessment', '/api/send-advisory'];
     if (validRoutes.includes(req.url) && req.method === 'POST') {
       let body = '';
       req.on('data', chunk => {
@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
           const data = JSON.parse(body);
           let action = '';
           if (req.url === '/api/send-assessment') action = 'assessment';
+          if (req.url === '/api/send-advisory') action = 'advisory';
 
           const response = await handleEmailRequest({ action, data }, apiKey);
           res.writeHead(response.status, { 'Content-Type': 'application/json' });

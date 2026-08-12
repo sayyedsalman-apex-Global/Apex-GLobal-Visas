@@ -28,6 +28,15 @@ app.post('/api/send-assessment', async (req, res) => {
   }
 });
 
+app.post('/api/send-advisory', async (req, res) => {
+  try {
+    const result = await handleEmailRequest({ action: 'advisory', data: req.body }, apiKey);
+    res.status(result.status).json(result.data);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 
 
 
