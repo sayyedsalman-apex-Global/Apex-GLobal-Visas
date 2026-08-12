@@ -75,7 +75,7 @@ export default function ContactForm({ preselectedCountry, prefilledMessage }) {
     setSubmitError('');
 
     try {
-      const response = await fetch('/api/send-advisory', {
+      const response = await fetch('/.netlify/functions/send-advisory', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -89,25 +89,24 @@ export default function ContactForm({ preselectedCountry, prefilledMessage }) {
         })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Failed to dispatch advisory request.';
+      const responseText = await response.text();
+      let resData = null;
 
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch {
-          if (errorText) {
-            errorMessage = errorText.slice(0, 200);
-          }
+      try {
+        if (responseText) {
+          resData = JSON.parse(responseText);
         }
+      } catch {
+        resData = null;
+      }
 
+      if (!response.ok) {
+        const errorMessage = resData?.error || resData?.message || responseText || 'Failed to dispatch advisory request.';
         throw new Error(errorMessage);
       }
 
-      const resData = await response.json();
-      if (!resData.success) {
-        throw new Error(resData.error || 'Failed to dispatch advisory request.');
+      if (!resData?.success) {
+        throw new Error(resData?.error || 'Failed to dispatch advisory request.');
       }
 
       setIsSubmitting(false);
